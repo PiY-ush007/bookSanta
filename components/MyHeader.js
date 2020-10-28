@@ -1,31 +1,55 @@
 import React, { Component} from 'react';
 import { Header,Icon,Badge } from 'react-native-elements';
 import { View, Text, StyeSheet ,Alert} from 'react-native';
+import { render } from 'react-dom';
+import db from '../config';
+
+export default class MyHeader extends React.Component{
+  constructor(props){
+    super(props);
+    this.state={
+      value:''
+    }
+  }
+
+  getNumberOfUnreadNotification(){
+ db.collection('all_notifications').where('notification_status','==',"unread")
+ .onSnapshot((snapshot)=>{
+   var allUnreadNotifications=snapshot.docs.map((doc)=>doc.data())
+   this.setState({
+     value:allUnreadNotifications.length
+   })
+ })
+  }
+  componentDidMount(){
+    this.getNumberOfUnreadNotification();
+  }
 
 
+ BellIconWithBadge=()=>{
 
-const BellIconWithBadge=(props)=>{
+  
   return(
     <View>
       <Icon name='bell' type='font-awesome' color='#696969' size={25}
-        onPress={() =>props.navigation.navigate('Notification')}/>
+        onPress={() =>this.props.navigation.navigate('Notification')}/>
        <Badge
-        value="1"
+        value={this.state.value}
        containerStyle={{ position: 'absolute', top: -4, right: -4 }}/>
     </View>
   )
 }
 
 
-const MyHeader = props => {
+render(){
   return (
     <Header
-      leftComponent={<Icon name='bars' type='font-awesome' color='#696969'  onPress={() => props.navigation.toggleDrawer()}/>}
-      centerComponent={{ text: props.title, style: { color: '#90A5A9', fontSize:20,fontWeight:"bold", } }}
-      rightComponent={<BellIconWithBadge {...props}/>}
+      leftComponent={<Icon name='bars' type='font-awesome' color='#696969'  onPress={() => this.props.navigation.toggleDrawer()}/>}
+      centerComponent={{ text: this.props.title, style: { color: '#90A5A9', fontSize:20,fontWeight:"bold", } }}
+      rightComponent={<this.BellIconWithBadge {...this.props}/>}
       backgroundColor = "#eaf8fe"
     />
   );
 };
+}
 
-export default MyHeader;
